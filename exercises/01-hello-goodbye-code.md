@@ -18,5 +18,8 @@ We generally don't want to delete everything in the Ignite template we don't nee
 - **ios/ android folders**: we're going to use Expo's prebuild to generate these on the fly, so we don't need them
 - **metro.config.js**: the default is fine, and if you ever wanted to put this in a monorepo, I'd recommend the config in Expo's docs
 
+### 3. Fix those dependencies
+Not sure why they're off. But you can run `npx expo install --fix` to fix them.
+
 More TODO's:
 - those side tabs on web, nasty
