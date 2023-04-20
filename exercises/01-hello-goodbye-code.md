@@ -8,6 +8,13 @@ Try out the ignite template and make some modifications to pare things down a bi
 4. Rename our tabs that we'll use for the rest of the time
 5. Make sure it all still works
 ## Useful info
+### Node 18.x compatibility issue
+If you get a weird SSL error when starting, do this:
+
+macOS/ Linux:
+`export NODE_OPTIONS=--openssl-legacy-provider`
+Windows (Powershell):
+`$env:NODE_OPTIONS="--openssl-legacy-provider"`
 
 ## How to do it
 ### 1. Run it as-is
@@ -20,6 +27,9 @@ We generally don't want to delete everything in the Ignite template we don't nee
 
 ### 3. Fix those dependencies
 Not sure why they're off. But you can run `npx expo install --fix` to fix them.
+
+### 4. Remove unnessary scripts
+- Remove `postinstall` from **package.json** scripts. We're not managing native projects, so we don't need to install Cocoapods, etc.
 
 More TODO's:
 - those side tabs on web, nasty
