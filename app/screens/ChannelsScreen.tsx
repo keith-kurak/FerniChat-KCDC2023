@@ -5,27 +5,11 @@ import { observer } from "mobx-react-lite"
 import React, { FC, useState } from "react"
 import { ActivityIndicator, FlatList, ImageStyle, ViewStyle, View } from "react-native"
 import Modal from "react-native-modal"
-import { ListItem, EmptyState, Screen, Button, Text, TextField } from "../components"
+import { ListItem, EmptyState, Screen, Button, TextField } from "../components"
 import { isRTL } from "../i18n"
 import { useStores } from "../models"
-import { Episode } from "../models/Episode"
 import { MainTabScreenProps } from "../navigators/MainNavigator"
 import { spacing, colors } from "../theme"
-
-const channels = [
-  {
-    id: "1",
-    title: "llamas-who-code",
-  },
-  {
-    id: "2",
-    title: "pizza-toppings",
-  },
-  {
-    id: "3",
-    title: "taylor-swifts-favorite-cars",
-  },
-]
 
 export const ChannelsScreen: FC<MainTabScreenProps<"Channels">> = observer(function ChannelsScreen(
   _props,
@@ -34,6 +18,8 @@ export const ChannelsScreen: FC<MainTabScreenProps<"Channels">> = observer(funct
 
   const isLoading = false
 
+  const { channelStore } = useStores()
+
   const [isModalVisible, setModalVisible] = useState(false)
 
   const [newChannelName, setNewChannelName] = useState("")
@@ -41,6 +27,11 @@ export const ChannelsScreen: FC<MainTabScreenProps<"Channels">> = observer(funct
   const toggleAddChannelModal = () => {
     setNewChannelName("")
     setModalVisible(!isModalVisible)
+  }
+
+  const addChannel = () => {
+    channelStore.addChannel(newChannelName)
+    toggleAddChannelModal()
   }
 
   useHeader({
@@ -52,7 +43,7 @@ export const ChannelsScreen: FC<MainTabScreenProps<"Channels">> = observer(funct
   return (
     <Screen preset="fixed" safeAreaEdges={[]} contentContainerStyle={$screenContentContainer}>
       <FlatList<any>
-        data={channels}
+        data={channelStore.channels}
         contentContainerStyle={$flatListContentContainer}
         ListEmptyComponent={
           isLoading ? (
@@ -60,6 +51,7 @@ export const ChannelsScreen: FC<MainTabScreenProps<"Channels">> = observer(funct
           ) : (
             <EmptyState
               preset="generic"
+              button={null}
               style={$emptyState}
               imageStyle={$emptyStateImage}
               ImageProps={{ resizeMode: "contain" }}
@@ -71,7 +63,7 @@ export const ChannelsScreen: FC<MainTabScreenProps<"Channels">> = observer(funct
             key={item.id}
             channel={item}
             onPress={() => {
-              navigation.navigate("Chat", { channelId: item.id })
+              navigation.navigate("Chat", { channelId: item.name })
             }}
           />
         )}
@@ -85,7 +77,7 @@ export const ChannelsScreen: FC<MainTabScreenProps<"Channels">> = observer(funct
             placeholder="Channel Name"
             onChangeText={(text) => setNewChannelName(text)}
           />
-          <Button text="Add Channel" onPress={toggleAddChannelModal} />
+          <Button text="Add Channel" onPress={addChannel} />
         </View>
       </Modal>
     </Screen>
@@ -99,7 +91,7 @@ const ChannelItem = observer(function ChannelItem({
   channel: any
   onPress: () => void
 }) {
-  return <ListItem bottomSeparator onPress={onPress} text={`#${channel.title}`} />
+  return <ListItem bottomSeparator onPress={onPress} text={`#${channel.name}`} />
 })
 
 // #region Styles
