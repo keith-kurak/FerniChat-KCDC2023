@@ -38,6 +38,9 @@ What we're going to focus on is mangling this template to the point where it bas
 The four tabs you see after "logging in" are set by DemoNavigator. We're going to keep the PodcastList and Debug tabs, and use them for Channels and Settings.
 1. Delete the other two tabs. You can just delete the entries in the TabNavigator itself for now (the orphaned files won't hurt anything).
 2. Next, fix the icons and names. These are also set in DemoNavigator. There's a nice "community" and "settings" icon. Call the tabs "Channels" and "Settings".
+#### a2. Let's fix the names
+Ahh this will be fun, let's rename files as such
+(maybe only rename the podcast screen)
 #### b. Set the structure of the Channels screen
 We want a traditional, fixed navigation header with a list of "channels". We'll stub this all out with mock data in the DemoPodcastListScreen.
 

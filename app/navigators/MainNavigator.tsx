@@ -5,13 +5,13 @@ import { TextStyle, ViewStyle } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Icon } from "../components"
 import { DemoDebugScreen } from "../screens"
-import { DemoPodcastListScreen } from "../screens/DemoPodcastListScreen"
+import { ChannelsScreen } from "../screens/ChannelsScreen"
 import { colors, spacing, typography } from "../theme"
 import { AppStackParamList, AppStackScreenProps } from "./AppNavigator"
 
-export type DemoTabParamList = {
-  DemoDebug: undefined
-  DemoPodcastList: undefined
+export type MainTabParamList = {
+  Settings: undefined
+  Channels: undefined
 }
 
 /**
@@ -19,14 +19,14 @@ export type DemoTabParamList = {
  *
  * More info: https://reactnavigation.org/docs/typescript/#organizing-types
  */
-export type DemoTabScreenProps<T extends keyof DemoTabParamList> = CompositeScreenProps<
-  BottomTabScreenProps<DemoTabParamList, T>,
+export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScreenProps<
+  BottomTabScreenProps<MainTabParamList, T>,
   AppStackScreenProps<keyof AppStackParamList>
 >
 
-const Tab = createBottomTabNavigator<DemoTabParamList>()
+const Tab = createBottomTabNavigator<MainTabParamList>()
 
-export function DemoNavigator() {
+export function MainNavigator() {
   const { bottom } = useSafeAreaInsets()
 
   return (
@@ -42,8 +42,8 @@ export function DemoNavigator() {
       }}
     >
       <Tab.Screen
-        name="DemoPodcastList"
-        component={DemoPodcastListScreen}
+        name="Channels"
+        component={ChannelsScreen}
         options={{
           tabBarLabel: "Channels",
           tabBarIcon: ({ focused }) => (
@@ -53,7 +53,7 @@ export function DemoNavigator() {
       />
 
       <Tab.Screen
-        name="DemoDebug"
+        name="Settings"
         component={DemoDebugScreen}
         options={{
           tabBarLabel: "Settings",

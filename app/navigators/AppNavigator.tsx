@@ -19,10 +19,9 @@ import Config from "../config"
 import { useStores } from "../models" // @demo remove-current-line
 import {
   LoginScreen, // @demo remove-current-line
-  WelcomeScreen,
   ChatScreen,
 } from "../screens"
-import { DemoNavigator, DemoTabParamList } from "./DemoNavigator" // @demo remove-current-line
+import { MainNavigator, MainTabParamList } from "./MainNavigator" // @demo remove-current-line
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 
 /**
@@ -42,7 +41,7 @@ export type AppStackParamList = {
   Chat: { channelId: string },
   Welcome: undefined
   Login: undefined // @demo remove-current-line
-  Demo: NavigatorScreenParams<DemoTabParamList> // @demo remove-current-line
+  Demo: NavigatorScreenParams<MainTabParamList> // @demo remove-current-line
   // 🔥 Your screens go here
 }
 
@@ -75,10 +74,7 @@ const AppStack = observer(function AppStack() {
       {/* @demo remove-block-start */}
       {isAuthenticated ? (
         <>
-          {/* @demo remove-block-end */}
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          {/* @demo remove-block-start */}
-          <Stack.Screen name="Demo" component={DemoNavigator} />
+          <Stack.Screen name="Demo" component={MainNavigator} />
           <Stack.Screen name="Chat" component={ChatScreen} />
         </>
       ) : (
