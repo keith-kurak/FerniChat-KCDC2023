@@ -2,19 +2,15 @@
 // https://ignitecookbook.com/docs/recipes/MigratingToFlashList
 import { useHeader } from "app/utils/useHeader"
 import { observer } from "mobx-react-lite"
-import React, { FC } from "react"
-import {
-  ActivityIndicator,
-  FlatList,
-  ImageStyle,
-  ViewStyle,
-} from "react-native"
-import {  Card, EmptyState, Screen } from "../components"
+import React, { FC, useState } from "react"
+import { ActivityIndicator, FlatList, ImageStyle, ViewStyle, View } from "react-native"
+import Modal from "react-native-modal"
+import { ListItem, EmptyState, Screen, Button, Text, TextField } from "../components"
 import { isRTL } from "../i18n"
 import { useStores } from "../models"
 import { Episode } from "../models/Episode"
 import { MainTabScreenProps } from "../navigators/MainNavigator"
-import { spacing } from "../theme"
+import { spacing, colors } from "../theme"
 
 const channels = [
   {
@@ -31,48 +27,70 @@ const channels = [
   },
 ]
 
-export const ChannelsScreen: FC<MainTabScreenProps<"Channels">> = observer(
-  function ChannelsScreen(_props) {
-    const { navigation } = _props
-    const [refreshing, setRefreshing] = React.useState(false)
-    const [isLoading, setIsLoading] = React.useState(false)
+export const ChannelsScreen: FC<MainTabScreenProps<"Channels">> = observer(function ChannelsScreen(
+  _props,
+) {
+  const { navigation } = _props
 
-    useHeader({
-      title: "Channels",
-    })
+  const isLoading = false
 
-    return (
-      <Screen preset="fixed" safeAreaEdges={[]} contentContainerStyle={$screenContentContainer}>
-        <FlatList<any>
-          data={channels}
-          contentContainerStyle={$flatListContentContainer}
-          refreshing={refreshing}
-          ListEmptyComponent={
-            isLoading ? (
-              <ActivityIndicator />
-            ) : (
-              <EmptyState
-                preset="generic"
-                style={$emptyState}
-                imageStyle={$emptyStateImage}
-                ImageProps={{ resizeMode: "contain" }}
-              />
-            )
-          }
-          renderItem={({ item }) => (
-            <ChannelItem
-              key={item.id}
-              channel={item}
-              onPress={() => {
-                navigation.navigate("Chat", { channelId: item.id })
-              }}
+  const [isModalVisible, setModalVisible] = useState(false)
+
+  const [newChannelName, setNewChannelName] = useState("")
+
+  const toggleAddChannelModal = () => {
+    setNewChannelName("")
+    setModalVisible(!isModalVisible)
+  }
+
+  useHeader({
+    title: "Channels",
+    rightText: "Add",
+    onRightPress: toggleAddChannelModal,
+  })
+
+  return (
+    <Screen preset="fixed" safeAreaEdges={[]} contentContainerStyle={$screenContentContainer}>
+      <FlatList<any>
+        data={channels}
+        contentContainerStyle={$flatListContentContainer}
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator />
+          ) : (
+            <EmptyState
+              preset="generic"
+              style={$emptyState}
+              imageStyle={$emptyStateImage}
+              ImageProps={{ resizeMode: "contain" }}
             />
-          )}
-        />
-      </Screen>
-    )
-  },
-)
+          )
+        }
+        renderItem={({ item }) => (
+          <ChannelItem
+            key={item.id}
+            channel={item}
+            onPress={() => {
+              navigation.navigate("Chat", { channelId: item.id })
+            }}
+          />
+        )}
+      />
+      <Modal isVisible={isModalVisible} onBackdropPress={toggleAddChannelModal}>
+        <View style={{ backgroundColor: colors.background }}>
+          <TextField
+            autoFocus
+            value={newChannelName}
+            containerStyle={{ margin: spacing.small }}
+            placeholder="Channel Name"
+            onChangeText={(text) => setNewChannelName(text)}
+          />
+          <Button text="Add Channel" onPress={toggleAddChannelModal} />
+        </View>
+      </Modal>
+    </Screen>
+  )
+})
 
 const ChannelItem = observer(function ChannelItem({
   channel,
@@ -81,7 +99,7 @@ const ChannelItem = observer(function ChannelItem({
   channel: any
   onPress: () => void
 }) {
-  return <Card style={$item} onPress={onPress} content={`#${channel.title}`} />
+  return <ListItem bottomSeparator onPress={onPress} text={`#${channel.title}`} />
 })
 
 // #region Styles
@@ -93,11 +111,6 @@ const $flatListContentContainer: ViewStyle = {
   paddingHorizontal: spacing.large,
   // paddingTop: spacing.large + spacing.extraLarge,
   paddingBottom: spacing.large,
-}
-
-const $item: ViewStyle = {
-  padding: spacing.medium,
-  marginTop: spacing.medium,
 }
 
 const $emptyState: ViewStyle = {
