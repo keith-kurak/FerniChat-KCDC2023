@@ -39,80 +39,109 @@ The four tabs you see after "logging in" are set by DemoNavigator. We're going t
 1. Delete the other two tabs. You can just delete the entries in the TabNavigator itself for now (the orphaned files won't hurt anything).
 2. Next, fix the icons and names. These are also set in DemoNavigator. There's a nice "community" and "settings" icon. Call the tabs "Channels" and "Settings".
 #### a2. Let's fix the names
-Ahh this will be fun, let's rename files as such
-(maybe only rename the podcast screen)
+In DemoNavigator set DemoTabParamList to:
+```
+export type DemoTabParamList = {
+  Channels: undefined
+  Settings: undefined
+}
+```
+Rename DemoPodcastListScreen to ChannelsScreen (rename file and the component name)
+Rename DemoDebugScreen to SettingsScreen (rename file and the component name)
+Make sure they're exporting correctly in screens/index.ts
+Update their references in DemoNavigator
 #### b. Set the structure of the Channels screen
-We want a traditional, fixed navigation header with a list of "channels". We'll stub this all out with mock data in the DemoPodcastListScreen.
+We want a traditional, fixed navigation header with a list of "channels". We'll stub this all out with mock data in the ChannelsScreen.
 
-1. Delete the `ListHeaderComponent` from the FlatList to get rid that big inline header.
-2. Use `useHeader` to apply a traditional navigation header with the title "Channels". This is usually done when defining the navigation stack, but Ingite added a nice hook to do this inline with the screen itself by using React Navigation's imparative API.
-3. Ew, there's a big space! That's because Ignite's screen component, which has handy settings to handle safe areas (notch stuff), is doing double work along with the header. Pass an empty array to `safeAreaEdges` to fix that.
-4. Get rid of just about everything episode-related. Start by replacing `EpisodeCard` with a simple thing that displays the name of a channel:
+1. Start by replacing `EpisodeCard` with a simple thing that displays the name of a channel:
 ```
 const ChannelItem = observer(function ChannelItem({
   channel,
+  onPress,
 }: {
   channel: any
+  onPress: () => void
 }) {
-
-  return (
-    <Card
-      style={$item}
-      onPress={() => {} /* we'll add this back later */}
-      content={`#${channel.title}`}
-    />
-  )
+  return <ListItem bottomSeparator onPress={onPress} text={`#${channel.name}`} />
 })
 ```
+Update your imports to include ListItem:
+```
+import { /** ... **/ ListItem } from "../components"
+```
 
-We'll ignore types, making your FlatList display our super-plain channels like this:
+2. Replace everything in ChannelsScreen with this:
 
 ```
- <FlatList<any>
-  data={channels}
-  contentContainerStyle={$flatListContentContainer}
-  refreshing={refreshing}
-  onRefresh={manualRefresh}
-  ListEmptyComponent={
-    isLoading ? (
-      <ActivityIndicator />
-    ) : (
-      <EmptyState
-        preset="generic"
-        style={$emptyState}
-        imageStyle={$emptyStateImage}
-        ImageProps={{ resizeMode: "contain" }}
+  const navigation =  useNavigation<NavigationProp<AppStackParamList>>()
+  useHeader({
+    title: 'Channels'
+  })
+
+   return (
+    <Screen preset="fixed" safeAreaEdges={["top"]} contentContainerStyle={$screenContentContainer}>
+      <FlatList<any>
+        data={channels}
+        contentContainerStyle={$flatListContentContainer}
+        ListEmptyComponent={
+          <EmptyState
+            preset="generic"
+            button={null}
+            style={$emptyState}
+            imageStyle={$emptyStateImage}
+            ImageProps={{ resizeMode: "contain" }}
+          />
+        }
+        renderItem={({ item }) => (
+          <ChannelItem
+            key={item.id}
+            channel={item}
+            onPress={() => {
+              navigation.navigate("Chat", { channelId: item.name })
+            }}
+          />
+        )}
       />
-    )
-  }
-  renderItem={({ item }) => (
-    <ChannelItem
-      key={item.id}
-      channel={item}
-    />
-  )}
-/>
+    </Screen>
+  )
 ```
 
-Make a canned list of channels at the top, like:
+You'll need to add some imports:
+```
+import { useHeader } from 'app/utils/useHeader'
+import { useNavigation, NavigationProp } from "@react-navigation/native"
+import { AppStackParamList } from 'app/navigators'
+```
+
+Note some changes here:
+
+Make a canned list of channels at the top of the file, like:
 ```
 const channels = [
 {
   id: "1",
-  title: "llamas-who-code",
+  name: "llamas-who-code",
 },
 {
   id: "2",
-  title: "pizza-toppings",
+  name: "pizza-toppings",
 },
 {
   id: "3",
-  title: "taylor-swifts-favorite-cars",
+  name: "taylor-swifts-favorite-cars",
 }
 ]
 ```
 
-Now you should have some off-centered channel titles. We won't leave it like this forever, but this is plenty.
+Now you should have some simple channel titles, but tapping on them should crash.
+
+There's going to be a ton of red squiggles in this file now. You can delete them if you'd like.
+
+**What's going on with the header?**
+We did a few mysterious things to change from a big inline header, to a fixed header at the top of the screen:
+a. We added `useHeader()` to give us access to the screen's title. This is a helper for modifying some react navigation params
+b. We set `safeAreaEdges` on Screen to an empty array, because `useHeader()` turns on React Navigation's header, which does its own safe area accounting.
+c. There's still some extra space coming from `$flatListContentContainer` style. Try tweaking it to see what happens.
 
 #### e. Add the stub for the chats screen
 Even though we don't have chats, or real channels, we an still put a placeholder screen for the chat to show up when we tap on the channel.
@@ -142,31 +171,17 @@ export const ChatScreen: FC<AppStackScreenProps<"Chat">> = observer(function Cha
   )
 })
 ```
-4. In DemoPodcastListScreen, add onPress parameters so ChannelItem looks like this:
-```
-const ChannelItem = observer(function ChannelItem({
-  channel,
-  onPress,
-}: {
-  channel: any
-  onPress: () => void
-}) {
-  return <Card style={$item} onPress={onPress} content={`#${channel.title}`} />
-})
-```
 
-Add the navigation call inside `renderItem`:
+You'll need to add some imports, too:
 ```
-onPress={() => {
-  navigation.navigate("Chat", { channelId: item.id })
-}}
+import { useNavigation, useRoute } from "@react-navigation/native"
+import { useHeader } from 'app/utils/useHeader'
 ```
-
-Now you should be able to tap a channel and push a screen, and go back.
+4. Now you should be able to tap a channel and push a screen, and go back.
 
 #### f. A little cleanup
 In AppNavigator, change the logged in `initialRouteName` to `Demo`. Now, our navigation is basically 100% of what our final app will have. Login, logout, go to channels, it's all there
 
 
 More TODO's:
-- those side tabs on web, nasty
+- those side tabs on web, nasty (maybe fixed by metro)
